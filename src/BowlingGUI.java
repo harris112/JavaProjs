@@ -29,7 +29,7 @@ public class BowlingGUI extends JFrame {
     int rolls = 1; //ROLLS/BOWLS DONE
     int CRS; //CURRENT ROLL SCORE
     int pins = 10; //INITIAL NUMBER OF PINS
-    int f = 1, pl = 0; //f = FRAME ID, frames iterate from 1 to 10, so initially 1. pl = PLAYER ID, players range from 0 to 7, where Player 0 is actually Player 1.
+    int f = 1, pl = 0; //f = FRAME ID, frames iterate from 1 to 10, so initially 1. pl = PLAYER ROW ID, ranging from 0-14 max since there are 2 players for every player and players range from 0 to 7, where Player 0 is actually Player 1.
     boolean frameOver = false; //To check when a PLAYER'S TURN WITHIN A SPECIFIC FRAME IS OVER.
     boolean strike = false; //To check for strikes.
     int strikef = 0, strikepl = 0; //Variables to record the frame and player who made a strike.
@@ -50,12 +50,12 @@ public class BowlingGUI extends JFrame {
     public BowlingGUI() {
         BOWLButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) { //When the bowl button is clicked.
                 Random RN = new Random();
-                CRS = RN.nextInt(pins + 1);
-                pins -= CRS;
-                pinsField.setText("                Pins: "+ pins);
-                if (rolls == 1){
+                CRS = RN.nextInt(pins + 1); //Generate the CURRENT ROLL SCORE [CRS] which is a random number in the range 0 to number of pins e.g. for roll 1 score, 0-10 always.
+                pins -= CRS; //Deduct current roll score from total number of pins (initially 10 at the start of a turn)
+                pinsField.setText("                Pins: "+ pins); //Display number of pins remaining.
+                if (rolls == 1){ //If first roll in process, assign score to roll1 and increment rolls to simulate the second roll next, and vice versa.
                     roll1 = CRS;
                     rolls++;
                 }
@@ -68,18 +68,18 @@ public class BowlingGUI extends JFrame {
                 if (roll1 == 10) { //STRIKE
                     strike = true;
                     strikef = f;
-                    strikepl = pl;
-                    rollStr = "    X";
-                    frameOver = true;
+                    strikepl = pl; // Record strike frame and player.
+                    rollStr = "    X"; //Strike represented by an 'X'
+                    frameOver = true; //Turn is over, since all pins knocked out by a strike.
                 }
                 else if ((roll1 + roll2) == 10) { //SPARE
-                    spare = true;
+                    spare = true;    
                     sparef = f;
-                    sparepl = pl;
+                    sparepl = pl;  //Record spare frame and player.
                     rollStr = "  ";
-                    if (roll1 != 0) rollStr += (char) (roll1 + '0');
-                    else rollStr += '-';
-                    rollStr += "  /";
+                    if (roll1 != 0) rollStr += (char) (roll1 + '0'); //Convert roll1 to char and concatenate to the string.
+                    else rollStr += '-'; //0 represented by '-'
+                    rollStr += "  /"; //Spare represented by '/'
                 }
                 else { //OPEN
                     rollStr = "  ";
@@ -89,30 +89,30 @@ public class BowlingGUI extends JFrame {
                     else rollStr += "  -";
                 }
 
-                 model.setValueAt(rollStr, pl, f);
+                model.setValueAt(rollStr, pl, f); //Set roll score string to scoreTable cell's value in the frame f for player row pl.
 
-                if(frameOver == true) {
-                    Fscores[f][pl / 2] += (roll1 + roll2);
-                    updateFrameScore(pl, f, Fscores[f][pl / 2]);
+                if(frameOver == true) { //After the player's turn is over (current frame ends)
+                    Fscores[f][pl / 2] += (roll1 + roll2); //Add sum of rollscores to 2D array for frame scores for the specific player and frame.
+                    updateFrameScore(pl, f, Fscores[f][pl / 2]); //Display this frame score onto the score table.
 
 
-                    if (strike == true && f == (strikef+1) && pl == strikepl) {
+                    if (strike == true && f == (strikef+1) && pl == strikepl) { //IF strike had been made AND it is the next frame from the one in which the strike was made AND is the player's turn who made the strike THEN.
 
-                        Fscores[strikef][strikepl / 2] +=  (roll1 + roll2);
-                        updateFrameScore(strikepl, (f-1), Fscores[strikef][strikepl / 2]);
+                        Fscores[strikef][strikepl / 2] +=  (roll1 + roll2); //Add score of the 2 new rolls this frame to the strike frame.
+                        updateFrameScore(strikepl, (f-1), Fscores[strikef][strikepl / 2]); //Update the strike frame for the player on the table.
                         strike = false;
                     }
 
-                    if (spare == true && f == (sparef+1) && pl == sparepl) {
+                    if (spare == true && f == (sparef+1) && pl == sparepl) { //Similar to the strike conditions
 
-
-                        Fscores[sparef][sparepl / 2] += roll1;
-                        updateFrameScore(sparepl, (f-1), Fscores[sparef][sparepl / 2]);
+                        Fscores[sparef][sparepl / 2] += roll1; //Add score of the first roll this frame to the spare frame.
+                        updateFrameScore(sparepl, (f-1), Fscores[sparef][sparepl / 2]);//Update the spare frame for the player on the table.
                         spare = false;
                     }
 
-                    pl += 2;
+                    pl += 2; //Increase player row by 2. (Since 2 rows for every player, and the first row for scores e.g. Player 7 will be row 14)
                     pinsField.setText("                Pins: "+ pins);
+                    //Reset all variables to initial values before the next turn.
                     pins = 10;
                     frameOver = false;
                     roll1 = 0;
@@ -126,18 +126,17 @@ public class BowlingGUI extends JFrame {
                 }
 
                 if (f == 11){
-                    BOWLButton.setEnabled(false);
-                    // getting total scores for all 8 players for their games.
+                    BOWLButton.setEnabled(false); //All turns over, bowl button no longer usable.
+                    // Calculating total scores for all 8 players for their games.
                     for (int y = 0; y < maxp * 2; y += 2) {
                         int TotalScore = 0;
                         for (int x = 1; x <= 10; x++) {
                             TotalScore += Fscores[x][y/2];
                         }
-                        // setting the calculated values for total scores and assigning the winner and his score.
-                        model.setValueAt(String.valueOf(TotalScore), (y + 1), 11);
-                        if (TotalScore > WinnerScore){
+                        model.setValueAt(String.valueOf(TotalScore), (y + 1), 11); //Display total score for a given player row y in the SECOND ROW (hence y+1) and column 11 ("Total"). 
+                        if (TotalScore > WinnerScore){ //Highest Total Score obtained in Winner Score.
                             WinnerScore = TotalScore;
-                            WinnerPlayer = (y/2+1);
+                            WinnerPlayer = (y/2+1); //Since the Player ID 14 (y here) for the row number means Player 7 (so y/2), which should be displayed as Player 8 (so + 1). 
                         }
                     }
                     RevealWinnerBtn.setEnabled(true);
@@ -154,6 +153,7 @@ public class BowlingGUI extends JFrame {
                 Pnames.setSize(400, 300);
                 Pnames.setVisible(true);
                 BOWLButton.setEnabled(true);
+                //Set names obtained from the player name fields into the "Players Column" of the table.
                 model.setValueAt(p.getPlayer1(), 0, 0);
                 model.setValueAt(p.getPlayer2(), 2, 0);
                 model.setValueAt(p.getPlayer3(), 4, 0);
