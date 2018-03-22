@@ -11,40 +11,38 @@ import javax.swing.table.TableCellRenderer;
 
 
 public class BowlingGUI extends JFrame {
-    private JPanel panel1;
+    private JPanel panel1; //Main content panel
     private JTextField WELCOMETOPINBOWLINGTextField;
-    private JButton SetPlayersBtn;
-    private JButton BOWLButton;
-    private JButton RevealWinnerBtn;
-    private Players p;
-
+    private JButton SetPlayersBtn; //Opens dialog box for setting max number of players and player names.
+    private JButton BOWLButton; //Used to simulate bowls, and handle all main operations.
+    private JButton RevealWinnerBtn; //Reveals the winner player with his score in a dialog box after all turns end.
+    private Players p; //Object containing all player name strings.
+    
     public JTable scoreTable;
     private JScrollPane RevealWinner;
     private JTextField pinsField;
     public DefaultTableModel model = (DefaultTableModel) scoreTable.getModel();
-    public int WinnerScore = 0;
-    public int WinnerPlayer = 0;
-    char[][] R1scores = new char[11][8]; //ROLL 1 SCORES
-    char[][] R2scores = new char[11][8]; //ROLL 2 SCORES
-    int[][] Fscores = new int[11][8]; //FRAME SCORES
-    int roll1 = 0, roll2 = 0;
-    int rolls = 1; //ROLLS DONE
+    public int WinnerScore = 0; //The score of the winner player. (Highest Total Score stored here)
+    public int WinnerPlayer = 0; //Winner Player ID (0-7) where Player 0 is actually Player 1.
+    int[][] Fscores = new int[11][8]; //2D ARRAY STORING FRAME SCORES FOR MAX 8 PLAYERS
+    int roll1 = 0, roll2 = 0; //ROLL SCORES FOR EACH ROLL/BOWL
+    int rolls = 1; //ROLLS/BOWLS DONE
     int CRS; //CURRENT ROLL SCORE
     int pins = 10; //INITIAL NUMBER OF PINS
-    int f = 1, pl = 0;
-    boolean frameOver = false;
-    boolean strike = false;
-    int strikef = 0, strikepl = 0;
-    boolean spare = false;
-    int sparef = 0, sparepl = 0;
-    String rollStr = "  ";
-    int maxp = 2;
+    int f = 1, pl = 0; //f = FRAME ID, frames iterate from 1 to 10, so initially 1. pl = PLAYER ID, players range from 0 to 7, where Player 0 is actually Player 1.
+    boolean frameOver = false; //To check when a PLAYER'S TURN WITHIN A SPECIFIC FRAME IS OVER.
+    boolean strike = false; //To check for strikes.
+    int strikef = 0, strikepl = 0; //Variables to record the frame and player who made a strike.
+    boolean spare = false; //To check for spares.
+    int sparef = 0, sparepl = 0; //Variables to record the frame and player who made a spare.
+    String rollStr = "  "; //Displayed on Jtable, used later after concatenation with roll1 and roll2 scores.
+    int maxp = 2; //MAXIMUM NUMBER OF PLAYERS
 
-    // setter for the players from the player names class.
+    // setter for the players from the PlayerNames class.
     public void setP(String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8) {
         p = new Players(p1, p2, p3, p4, p5, p6, p7, p8);
     }
-
+    // setter for the maximum number of players from the PlayerNames class.
     public void setMaxp(int n){
         this.maxp = n;
     }
@@ -179,9 +177,9 @@ public class BowlingGUI extends JFrame {
 
 
     private void updateFrameScore(int p, int f, int fs) {
-        String spaces = "     ";
+        String spaces = "     "; //Spaces for formatting.
         if (fs>=10) spaces = "   ";
-        model.setValueAt((spaces + fs), (p + 1), f);
+        model.setValueAt((spaces + fs), (p + 1), f); //Print final frame score string with spaces onto the SECOND ROW from the first player row p (p+1 hence) and frame f. 
     }
 
 
@@ -190,29 +188,26 @@ public class BowlingGUI extends JFrame {
         frame.setContentPane(new BowlingGUI().panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setSize(1100, 340);
+        frame.setSize(1100, 340); //preferred size of window frame
         frame.setVisible(true);
-
-        System.out.print("Now starting a new game!\n");
-        //EMPTY ALL LABELS TO DEFAULT
-
     }
 
     private void createUIComponents() {
-        String[] columns = {"Players","1", "2", "3","4","5","6","7","8","9","10","Total"};
-        String[][] data = {{}};
-
-        model = new DefaultTableModel(data, columns);
+        String[] columns = {"Players","1", "2", "3","4","5","6","7","8","9","10","Total"}; //Column Headers (12 columns total)
+        String[][] data = {{}}; //2D string array for score data, initially empty.
+        
+        model = new DefaultTableModel(data, columns); //New scoreTable model according to these rows and columns
 
         scoreTable = new JTable(model){
-            public boolean isCellEditable(int data, int columns)
+            public boolean isCellEditable(int data, int columns) //Make cells of the jtable non-editable. They will only display scores.
             {
                 return false;
             }
 
-            public Component prepareRenderer(TableCellRenderer r, int data, int columns) {
+            public Component prepareRenderer(TableCellRenderer r, int data, int columns) {  //Using a TableCellRenderer to edit properties for cell background and foreground color
                 Component color = super.prepareRenderer(r, data, columns);
-                //0, 1  4,5   8,9  12,13
+                /*Switch background and foreground colors for every 2 data rows for this score sheet table.
+                This is done so that it is easier to distinguish the 2 rows for every player separately. */
                 if (data % 4 == 0 || (data-1) % 4 == 0) {
                     color.setBackground(Color.WHITE);
                     color.setForeground(Color.BLACK);
@@ -228,7 +223,7 @@ public class BowlingGUI extends JFrame {
 
 
         //ROW 0 already in place
-        //INITIALIZING ADDING EMPTY ROWS
+        //INITIALIZING BY ADDING EMPTY ROWS
         for (int i = 1; i < 16; i++) {
             model.addRow(new Object[]{});
         }
