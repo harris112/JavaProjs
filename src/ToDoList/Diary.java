@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * Created by u1774154 on 25/01/2018.
+ * Created on 25/01/2018.
  */
 public class Diary {
 
